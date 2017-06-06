@@ -1,0 +1,7 @@
+#!/bin/sh
+#将proc文件系统挂载到/proc目录，因为很多应用程序会使用到/proc中的信息，不挂载会导致各种异常
+mount -t proc none /proc
+#将sys文件系统挂载到/sys目录，因为很多应用程序会使用到/sys中的信息，不挂载会导致各种异常
+mount -t sysfs none /sys
+#mdev是busybox自带的一个udev，用于系统启动和热插拔或动态加载驱动程序时，自动产生设备节点，这句话如果不加上则需要手动mknod来挂载设备节点
+/sbin/mdev -s
