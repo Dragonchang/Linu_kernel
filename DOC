@@ -1,0 +1,15 @@
+KVM 编译和安装:
+qemu代码:
+https://sourceforge.net/projects/kvm/files/latest/download?source=files
+http://git.qemu.org/?p=qemu.git;a=commit;h=8bacde8d86a09699207d85d4bab06162aed18dc4
+
+参考:
+http://royluo.org/2014/06/15/kvm-install-1/
+http://royluo.org/2014/06/16/kvm-install-2/
+http://www.cnblogs.com/senix/archive/2013/02/21/2921221.html
+
+linux 代码:
+https://www.kernel.org/pub/linux/kernel/v3.x/linux-3.4.1.tar.gz
+
+busybox代码:
+http://busybox.net/downloads/busybox-1.22.1.tar.bz2
