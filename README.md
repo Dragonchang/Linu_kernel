@@ -8,3 +8,5 @@
   gcc  exec.c  -o libshare -static -m32  
 # 4.生成共享object文件主要是so库
   gcc -shared dynaLib.c -o libdynaLib.so -m32
+# 5.查看.a静态库文件内容  
+  ar -t *.a
