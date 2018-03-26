@@ -1,0 +1,325 @@
+
+
+Symptom: n/a
+Bug ID: n/a
+Root Cause: n/a
+Solution: n/a
+Project: all
+Note:
+    add more log for ip rule
+
+Test done by RD: build ok
+Futher testing need Q team's support: network related test
+
+
+---
+ client/Android.mk           |  5 ++++
+ client/NetdClient.cpp       | 20 +++++++++++++
+ server/CommandListener.cpp  | 10 +++++++
+ server/NetdConstants.cpp    | 20 +++++++++++++
+ server/NetdConstants.h      |  6 ++++
+ server/RouteController.cpp  | 72 +++++++++++++++++++++++++++++++++++++++++++++
+ server/StrictController.cpp |  5 +++-
+ 7 files changed, 137 insertions(+), 1 deletion(-)
+ mode change 100644 => 100755 client/Android.mk
+ mode change 100644 => 100755 client/NetdClient.cpp
+ mode change 100644 => 100755 server/CommandListener.cpp
+ mode change 100644 => 100755 server/NetdConstants.cpp
+ mode change 100644 => 100755 server/NetdConstants.h
+ mode change 100644 => 100755 server/RouteController.cpp
+ mode change 100644 => 100755 server/StrictController.cpp
+
+diff --git a/client/Android.mk b/client/Android.mk
+old mode 100644
+new mode 100755
+index e202534..d640155
+--- a/client/Android.mk
++++ b/client/Android.mk
+@@ -22,4 +22,9 @@ LOCAL_CPPFLAGS := -std=c++11 -Wall -Werror
+ LOCAL_MODULE := libnetd_client
+ LOCAL_SRC_FILES := FwmarkClient.cpp NetdClient.cpp
+ 
++# SSD_NETWORK_START
++#PCN00001_LOG_FOR_IP_RULE
++LOCAL_SHARED_LIBRARIES := libcutils
++# SSD_NETWORK_END
++
+ include $(BUILD_SHARED_LIBRARY)
+diff --git a/client/NetdClient.cpp b/client/NetdClient.cpp
+old mode 100644
+new mode 100755
+index 392b0af..88c714a
+--- a/client/NetdClient.cpp
++++ b/client/NetdClient.cpp
+@@ -27,6 +27,12 @@
+ #include "FwmarkCommand.h"
+ #include "resolv_netid.h"
+ 
++//PCN00001_LOG_FOR_IP_RULE
++#if 1
++#define LOG_TAG "NetdClient"
++#include <cutils/log.h>
++#endif
++
+ namespace {
+ 
+ std::atomic_uint netIdForProcess(NETID_UNSET);
+@@ -189,11 +195,25 @@ extern "C" int setNetworkForSocket(unsigned netId, int socketFd) {
+ }
+ 
+ extern "C" int setNetworkForProcess(unsigned netId) {
++//PCN00001_LOG_FOR_IP_RULE
++#if 1
++    int ret = setNetworkForTarget(netId, &netIdForProcess);
++    ALOGD("setNetworkForProcess: 0x%x, ret=%d", netId, ret);
++    return ret;
++#else
+     return setNetworkForTarget(netId, &netIdForProcess);
++#endif
+ }
+ 
+ extern "C" int setNetworkForResolv(unsigned netId) {
++//PCN00001_LOG_FOR_IP_RULE
++#if 1
++    int ret = setNetworkForTarget(netId, &netIdForResolv);
++    ALOGD("setNetworkForResolv: 0x%x, ret=%d", netId, ret);
++    return ret;
++#else
+     return setNetworkForTarget(netId, &netIdForResolv);
++#endif
+ }
+ 
+ extern "C" int protectFromVpn(int socketFd) {
+diff --git a/server/CommandListener.cpp b/server/CommandListener.cpp
+old mode 100644
+new mode 100755
+index 1fac00c..675a600
+--- a/server/CommandListener.cpp
++++ b/server/CommandListener.cpp
+@@ -14,7 +14,12 @@
+  * limitations under the License.
+  */
+ 
++//PCN00001_LOG_FOR_IP_RULE
++#if 1
++#define LOG_NDEBUG 0
++#else
+ // #define LOG_NDEBUG 0
++#endif
+ 
+ #include <stdlib.h>
+ #include <sys/socket.h>
+@@ -1513,6 +1518,11 @@ int CommandListener::StrictCmd::runCommand(SocketClient *cli, int argc,
+         return 0;
+     }
+ 
++//PCN00001_LOG_FOR_IP_RULE
++#if 1
++    ALOGV("strictcmd: argc=%d %s %s ...", argc, argv[0], argv[1]);
++#endif
++
+     if (!strcmp(argv[1], "enable")) {
+         int res = gCtls->strictCtrl.enableStrict();
+         return sendGenericOkFail(cli, res);
+diff --git a/server/NetdConstants.cpp b/server/NetdConstants.cpp
+old mode 100644
+new mode 100755
+index 7bd4316..b0b6c08
+--- a/server/NetdConstants.cpp
++++ b/server/NetdConstants.cpp
+@@ -255,3 +255,23 @@ int parsePrefix(const char *prefix, uint8_t *family, void *address, int size, ui
+ 
+     return rawLength;
+ }
++
++//PCN00001_LOG_FOR_IP_RULE
++#if 1
++const char* maskIPString(const char *str) {
++    static char maskedbuf[MAX_IP_CMD_SIZE];
++    char *begin,*end = NULL;
++    strncpy(maskedbuf, str, MAX_IP_CMD_SIZE);
++    begin = strchr(maskedbuf,':');
++    if(begin) {
++        end = strrchr(maskedbuf,':');
++    } else if((begin = strchr(maskedbuf,'.')))
++    {
++        end = strrchr(maskedbuf,'.');
++    }
++    if(end && begin && begin+1<end) {
++        memset(begin+1,'*',end-begin-1);
++    }
++    return maskedbuf;
++}
++#endif
+diff --git a/server/NetdConstants.h b/server/NetdConstants.h
+old mode 100644
+new mode 100755
+index e3f533a..b6c4ca2
+--- a/server/NetdConstants.h
++++ b/server/NetdConstants.h
+@@ -58,6 +58,12 @@ int parsePrefix(const char *prefix, uint8_t *family, void *address, int size, ui
+ 
+ const uid_t INVALID_UID = static_cast<uid_t>(-1);
+ 
++//PCN00001_LOG_FOR_IP_RULE
++#if 1
++const uint16_t MAX_IP_CMD_SIZE = 1024;
++const char* maskIPString( const char *str );
++#endif
++
+ class Stopwatch {
+ public:
+     Stopwatch() : mStart(std::chrono::steady_clock::now()) {}
+diff --git a/server/RouteController.cpp b/server/RouteController.cpp
+old mode 100644
+new mode 100755
+index 1e17509..8f761a5
+--- a/server/RouteController.cpp
++++ b/server/RouteController.cpp
+@@ -154,6 +154,10 @@ void addTableName(uint32_t table, const std::string& name, std::string* contents
+     *contents += " ";
+     *contents += name;
+     *contents += "\n";
++//PCN00001_LOG_FOR_IP_RULE
++#if 1
++    ALOGD("addTableName %s = %d", name.c_str(), table);
++#endif
+ }
+ 
+ // Doesn't return success/failure as the file is optional; it's okay if we fail to update it.
+@@ -291,6 +295,25 @@ WARN_UNUSED_RESULT int modifyIpRule(uint16_t action, uint32_t priority, uint8_t
+ 
+     bool isUidRule = (uidStart != INVALID_UID);
+ 
++//PCN00001_LOG_FOR_IP_RULE
++#if 1
++    char targetstr[MAX_IP_CMD_SIZE];
++    targetstr[0]='\0';
++    if(iif!=IIF_NONE)
++        snprintf(targetstr,MAX_IP_CMD_SIZE,"%siif %s ", targetstr, iif);
++    if(oif!=OIF_NONE)
++        snprintf(targetstr,MAX_IP_CMD_SIZE,"%soif %s ", targetstr, oif);
++    if(fwmark!=MARK_UNSET || mask!=MARK_UNSET)
++        snprintf(targetstr,MAX_IP_CMD_SIZE,"%sfwmark 0x%x/0x%x ", targetstr, fwmark, mask);
++    if(isUidRule)
++        snprintf(targetstr,MAX_IP_CMD_SIZE,"%suidrange %d-%d ", targetstr, uidStart, uidEnd);
++    if(table != RT_TABLE_UNSPEC)
++        snprintf(targetstr,MAX_IP_CMD_SIZE,"%slookup %d ", targetstr, table);
++    else
++        snprintf(targetstr,MAX_IP_CMD_SIZE,"%sunreachable ", targetstr);
++    ALOGD("ip rule %s %sprio %d", action==RTM_NEWRULE?"add":"del",
++           targetstr, priority);
++#endif
+     // Assemble a rule request and put it in an array of iovec structures.
+     fib_rule_hdr rule = {
+         .action = ruleType,
+@@ -336,10 +359,21 @@ WARN_UNUSED_RESULT int modifyIpRule(uint16_t action, uint32_t priority, uint8_t
+     for (size_t i = 0; i < ARRAY_SIZE(AF_FAMILIES); ++i) {
+         rule.family = AF_FAMILIES[i];
+         if (int ret = sendNetlinkRequest(action, flags, iov, ARRAY_SIZE(iov))) {
++//PCN00001_LOG_FOR_IP_RULE
++#if 1
++            ALOGD("ip rule %s %sprio %d ret=%d", action==RTM_NEWRULE?"add":"del",
++               targetstr, priority, ret);
++#endif
+             return ret;
+         }
+     }
+ 
++//PCN00001_LOG_FOR_IP_RULE
++#if 1
++    ALOGD("ip rule %s %sprio %d ret=0", action==RTM_NEWRULE?"add":"del",
++       targetstr, priority);
++#endif
++
+     return 0;
+ }
+ 
+@@ -414,6 +448,23 @@ WARN_UNUSED_RESULT int modifyIpRoute(uint16_t action, uint32_t table, const char
+         }
+     }
+ 
++//PCN00001_LOG_FOR_IP_RULE
++#if 1
++    char nextstr[MAX_IP_CMD_SIZE];
++    if(type == RTN_THROW)
++        snprintf(nextstr, MAX_IP_CMD_SIZE,"throw ");
++    else if(type == RTN_UNREACHABLE)
++        snprintf(nextstr, MAX_IP_CMD_SIZE,"unreachable ");
++    else if(nexthop)
++        snprintf(nextstr, MAX_IP_CMD_SIZE,"via %s ", maskIPString(nexthop));
++    else
++        snprintf(nextstr, MAX_IP_CMD_SIZE,"");
++    ALOGD("ip %sroute %s %s %sdev %s table %d",
++            family==AF_INET6?"-6 ":"",
++            action==RTM_NEWROUTE?"add":"del", maskIPString(destination),
++            nextstr, interface, table);
++#endif
++
+     // Assemble a rtmsg and put it in an array of iovec structures.
+     rtmsg route = {
+         .rtm_protocol = RTPROT_STATIC,
+@@ -441,7 +492,17 @@ WARN_UNUSED_RESULT int modifyIpRoute(uint16_t action, uint32_t table, const char
+ 
+     uint16_t flags = (action == RTM_NEWROUTE) ? NETLINK_CREATE_REQUEST_FLAGS :
+                                                 NETLINK_REQUEST_FLAGS;
++//PCN00001_LOG_FOR_IP_RULE
++#if 1
++    int ret = sendNetlinkRequest(action, flags, iov, ARRAY_SIZE(iov));
++    ALOGD("ip %sroute %s %s %sdev %s table %d ret=%d",
++            family==AF_INET6?"-6 ":"",
++            action==RTM_NEWROUTE?"add":"del", maskIPString(destination),
++            nextstr, interface, table, ret);
++    return ret;
++#else
+     return sendNetlinkRequest(action, flags, iov, ARRAY_SIZE(iov));
++#endif
+ }
+ 
+ // An iptables rule to mark incoming packets on a network with the netId of the network.
+@@ -870,6 +931,12 @@ WARN_UNUSED_RESULT int flushRules() {
+             return -EREMOTEIO;
+         }
+     }
++
++//PCN00001_LOG_FOR_IP_RULE
++#if 1
++    ALOGD("ip rule flush");
++#endif
++
+     return 0;
+ }
+ 
+@@ -951,6 +1018,11 @@ WARN_UNUSED_RESULT int flushRoutes(const char* interface) {
+         }
+     }
+ 
++//PCN00001_LOG_FOR_IP_RULE
++#if 1
++    ALOGD("ip route flush table %d", table);
++#endif
++
+     // If we failed to flush routes, the caller may elect to keep this interface around, so keep
+     // track of its name.
+     if (!ret) {
+diff --git a/server/StrictController.cpp b/server/StrictController.cpp
+old mode 100644
+new mode 100755
+index 8cdee07..e295526
+--- a/server/StrictController.cpp
++++ b/server/StrictController.cpp
+@@ -135,7 +135,10 @@ int StrictController::enableStrict(void) {
+ #undef CMD_V4
+ #undef CMD_V6
+ #undef CMD_V4V6
+-
++//PCN00001_LOG_FOR_IP_RULE
++#if 1
++    ALOGD("enableStrict res=%d",res);
++#endif
+     return res;
+ }
+ 
+-- 
+1.9.1
+
