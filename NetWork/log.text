@@ -1,0 +1,82 @@
+mNetd.createPhysicalNetwork->mConnector.execute("network", "create", netId);
+mNetd.addInterfaceToNetwork(iface, netId);->modifyInterfaceInNetwork("add", "" + netId, iface);-> mConnector.execute("network", "interface", action, netId, iface);
+
+radio     936   1     18116  2544  poll_sched 7fb5b553e8 S /system/bin/qmuxd
+radio     1009  1     107936 3824  __skb_recv 7f939f3250 S /system/bin/netmgrd
+radio     867   1     76752  10764 hrtimer_na 7fb322fce8 S /system/bin/rild
+radio     997   1     77008  9960  hrtimer_na 7f92cf8ce8 S /system/bin/rild
+
+03-14 15:46:39.501  4407  4702 D RILJ    : [3863]> SETUP_DATA_CALL 14 0 3gnet   1 IP [SUB0]
+03-14 15:46:39.514   867   932 D RILC    : [3863]> SETUP_DATA_CALL (16,0,3gnet,,,1,IP)
+
+03-14 15:46:39.631  1009  1045 I QC-DS-LIB: ds_exec_internal(): Executing command "ip addr add 10.159.120.248/255.255.255.240 dev rmnet_data0"
+03-14 15:46:39.633  1009  1045 I QC-DS-LIB: ds_exec_internal(): [cpid:12966] Spawned child PID(12966) command:"ip addr add 10.159.120.248/255.255.255.240 dev rmnet_data0"
+03-14 15:46:39.650  1009  1045 I QC-DS-LIB: ds_exec_internal(): Executing command "iptables  -w -W 0.01 -t mangle -D qcom_qos_reset_POSTROUTING -o rmnet_data0 -s 10.159.120.248 -j MARK --set-mark 0x0"
+03-14 15:46:39.652  1009  1045 I QC-DS-LIB: ds_exec_internal(): [cpid:12967] Spawned child PID(12967) command:"iptables  -w -W 0.01 -t mangle -D qcom_qos_reset_POSTROUTING -o rmnet_data0 -s 10.159.120.248 -j MARK --set-mark 0x0"
+03-14 15:46:39.676  1009  1045 I QC-DS-LIB: ds_exec_internal(): Executing command "iptables  -w -W 0.01 -t mangle -A qcom_qos_reset_POSTROUTING -o rmnet_data0 -s 10.159.120.248 -j MARK --set-mark 0x0"
+03-14 15:46:39.679  1009  1045 I QC-DS-LIB: ds_exec_internal(): [cpid:12968] Spawned child PID(12968) command:"iptables  -w -W 0.01 -t mangle -A qcom_qos_reset_POSTROUTING -o rmnet_data0 -s 10.159.120.248 -j MARK --set-mark 0x0"
+03-14 15:46:39.714  1009  1045 I QC-DS-LIB: ds_exec_internal(): Executing command "tc qdisc add dev rmnet_data0 root handle 1:0 htb default 10"
+03-14 15:46:39.716  1009  1045 I QC-DS-LIB: ds_exec_internal(): [cpid:12970] Spawned child PID(12970) command:"tc qdisc add dev rmnet_data0 root handle 1:0 htb default 10"
+03-14 15:46:39.736  1009  1045 I QC-DS-LIB: ds_exec_internal(): [cpid:12970] Process exited normally with rc=0
+03-14 15:46:39.741  1009  1045 I QC-DS-LIB: ds_exec_internal(): [cpid:12972] Spawned child PID(12972) command:"tc class add dev rmnet_data0 parent root classid 1:1 htb prio 0 rate 800000000bit ceil 800000000bit burst 1600"
+03-14 15:46:39.760  1009  1045 I QC-DS-LIB: ds_exec_internal(): [cpid:12972] Process exited normally with rc=0
+03-14 15:46:39.760  1009  1045 I QC-DS-LIB: ds_exec_internal(): Executing command "tc class add dev rmnet_data0 parent 1:1 classid 1:10 htb prio 7 rate 800000000bit ceil 800000000bit burst 1600"
+03-14 15:46:39.762  1009  1045 I QC-DS-LIB: ds_exec_internal(): [cpid:12974] Spawned child PID(12974) command:"tc class add dev rmnet_data0 parent 1:1 classid 1:10 htb prio 7 rate 800000000bit ceil 800000000bit burst 1600"
+03-14 15:46:39.786  1009  1045 I QC-DS-LIB: ds_exec_internal(): [cpid:12974] Process exited normally with rc=0
+03-14 15:46:39.787  1009  1045 I QC-DS-LIB: ds_exec_internal(): Executing command "tc qdisc add dev rmnet_data0 parent 1:10 handle 10:0 prio flow enable"
+03-14 15:46:39.790  1009  1045 I QC-DS-LIB: ds_exec_internal(): [cpid:12975] Spawned child PID(12975) command:"tc qdisc add dev rmnet_data0 parent 1:10 handle 10:0 prio flow enable"
+03-14 15:46:39.812  1009  1045 I QC-DS-LIB: ds_exec_internal(): [cpid:12975] Process exited normally with rc=0
+
+
+03-14 15:46:39.826   867  1048 D RILC    : [3863]< SETUP_DATA_CALL {[status=0,retry=-1,cid=0,up,IP,rmnet_data0,10.159.120.248/28,221.6.4.66 58.240.57.33,10.159.120.249,,mtu=1500]}
+03-14 15:46:39.826  4407  4627 D RILJ    : responseSetupDataCall ver=11 num=1 [SUB0]
+03-14 15:46:39.826  4407  4627 D RILJ    : [3863]< SETUP_DATA_CALL DataCallResponse: {version=11 status=0 retry=-1 cid=0 active=2 type=IP ifname=rmnet_data0 mtu=1500 addresses=[10.159.120.248/28] dnses=[221.6.4.66,58.240.57.33] gateways=[10.159.120.249] pcscf=[]} [SUB0]
+03-14 15:46:39.826  4407  4702 D DataCallResponse: addr/pl=10.159.120.248/28
+03-14 15:46:39.846  4407  4407 D DCT     : [0]onDataSetupComplete: success apn=3gnet
+03-14 15:46:39.846  4407  4407 D DCT     : [0]RCS dataconnection establish enable the delay disconnect feature
+03-14 15:46:39.847  4407  4407 D DCT     : [0][ApnContext:default] setState: CONNECTED, previous state:CONNECTING
+03-14 15:46:39.848  4407  4407 D DCT     : [0]setTetherGuardErrorCause: Not dun/default apntype or SPCS project
+03-14 15:46:39.848  4407  4407 D DCT     : [0]completeConnection: successful, notify the world apnContext={mApnType=default mState=CONNECTED mWaitingApns={[[ApnSettingV3] Carrier=沃宽带用户连接互联网, Id=3454, Numeric=46001, Apn=3**et, Proxy=, MMSC=, MMSProxy=, MMSPort=, AuthType=1, Types=default | hipri | dun | supl, Protocol=IP, RoamingProtocol=IP, CarrierEnabled=true, Bearer=0, BearerBitmask=, ProfileId=0, ModemCognitive=false, MaxConns=0, WaitTime=0, MaxConnsTime=0, Mtu=1420, MvnoType=, MvnoMatchData=, PermanentFailed=false, ApnProfileID=10, Dns1=null, Dns2=null]} mApnSetting={[ApnSettingV3] Carrier=沃宽带用户连接互联网, Id=3454, Numeric=46001, Apn=3**et, Proxy=, MMSC=, MMSProxy=, MMSPort=, AuthType=1, Types=default | hipri | dun | supl, Protocol=IP, RoamingProtocol=IP, CarrierEnabled=true, Bearer=0, BearerBitmask=, ProfileId=0, ModemCognitive=false, MaxConns=0, WaitTime=0, MaxConnsTime=0, Mtu=1420, MvnoType=, MvnoMatchData=, PermanentFailed=false, ApnProfileID=10, Dns1=null, Dns2=null} mReason=connected mDataEnabled=true mDependencyMet=true}
+
+
+03-14 15:46:39.852  3580 11835 D ConnectivityService: registerNetworkAgent NetworkAgentInfo{ ni{[type: MOBILE[LTE], state: CONNECTED/CONNECTED, reason: connected, extra: 3gnet, failover: false, available: true, roaming: false, metered: true]}  network{106}  nethandle{455282969310}  lp{{InterfaceName: rmnet_data0 LinkAddresses: [10.159.120.248/28,]  Routes: [0.0.0.0/0 -> 10.159.120.249 rmnet_data0,] DnsAddresses: [221.6.4.66,58.240.57.33,] Domains: null MTU: 1500 TcpBufferSizes: 524288,1048576,5120000,524288,1048576,6922240}}  nc{[ Transports: CELLULAR Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VPN LinkUpBandwidth>=51200Kbps LinkDnBandwidth>=102400Kbps Specifier: <2>]}  Score{10}  everValidated{false}  lastValidated{false}  created{false} lingering{false} explicitlySelected{false} acceptUnvalidated{false} everCaptivePortalDetected{false} lastCaptivePortalDetected{false} }
+03-14 15:46:39.853  3580  4058 D ConnectivityService: Got NetworkAgent Messenger
+03-14 15:46:39.853  3580  4058 D ConnectivityService: NetworkAgentInfo [MOBILE (LTE) - 106] EVENT_NETWORK_INFO_CHANGED, going from null to CONNECTED
+03-14 15:46:39.853  3580  4058 D NetdConnector: SND -> {1715 network create 106}
+03-14 15:46:39.854  3580  4048 D NetdConnector: RCV <- {200 1715 success}
+03-14 15:46:39.855  3580  4058 D ConnectivityService: Adding iface rmnet_data0 to network 106
+03-14 15:46:39.855  3580  4058 D NetdConnector: SND -> {1716 network interface add 106 rmnet_data0}
+03-14 15:46:39.856   866  4019 D Netd    : iptables -w -t mangle -A INPUT -i rmnet_data0 -j MARK --set-mark 0x3006a 
+03-14 15:46:39.870   866  4019 D Netd    : iptables -w -t mangle -A INPUT -i rmnet_data0 -j MARK --set-mark 0x3006a res=0
+03-14 15:46:39.870   866  4019 D Netd    : ip6tables -w -t mangle -A INPUT -i rmnet_data0 -j MARK --set-mark 0x3006a 
+03-14 15:46:39.885   866  4019 D Netd    : ip6tables -w -t mangle -A INPUT -i rmnet_data0 -j MARK --set-mark 0x3006a res=0
+03-14 15:46:39.885   866  4019 D Netd    : ip rule add fwmark 0x1006a/0x1ffff lookup 1005 prio 13000
+03-14 15:46:39.885   866  4019 D Netd    : ip rule add fwmark 0x1006a/0x1ffff lookup 1005 prio 13000 ret=0
+03-14 15:46:39.885   866  4019 D Netd    : ip rule add oif rmnet_data0 uidrange 0-0 lookup 1005 prio 10500
+03-14 15:46:39.885   866  4019 D Netd    : ip rule add oif rmnet_data0 uidrange 0-0 lookup 1005 prio 10500 ret=0
+03-14 15:46:39.885   866  4019 D Netd    : ip rule add oif rmnet_data0 lookup 1005 prio 14000
+03-14 15:46:39.885   866  4019 D Netd    : ip rule add oif rmnet_data0 lookup 1005 prio 14000 ret=0
+03-14 15:46:39.885   866  4019 D Netd    : ip rule add fwmark 0x6a/0x1ffff lookup 1005 prio 19000
+03-14 15:46:39.885   866  4019 D Netd    : ip rule add fwmark 0x6a/0x1ffff lookup 1005 prio 19000 ret=0
+03-14 15:46:39.885   866  4019 D Netd    : addTableName local = 255
+03-14 15:46:39.885   866  4019 D Netd    : addTableName main = 254
+03-14 15:46:39.885   866  4019 D Netd    : addTableName local_network = 97
+03-14 15:46:39.885   866  4019 D Netd    : addTableName legacy_network = 98
+03-14 15:46:39.885   866  4019 D Netd    : addTableName legacy_system = 99
+03-14 15:46:39.885   866  4019 D Netd    : addTableName dummy0 = 1002
+03-14 15:46:39.885   866  4019 D Netd    : addTableName rmnet_data0 = 1005
+03-14 15:46:39.886  3580  4048 D NetdConnector: RCV <- {200 1716 success}
+03-14 15:46:39.887  3580  4058 D ConnectivityService: Setting MTU size: rmnet_data0, 1500
+03-14 15:46:39.887  3580  4058 D NetdConnector: SND -> {1717 interface setmtu rmnet_data0 1500}
+03-14 15:46:39.888  3580  4048 D NetdConnector: RCV <- {200 1717 MTU changed}
+03-14 15:46:39.889  3580  4058 D ConnectivityService: Adding Route [0.0.0.0/0 -> 10.159.120.249 rmnet_data0] to network 106
+03-14 15:46:39.889  3580  4058 D NetdConnector: SND -> {1718 network route add 106 rmnet_data0 0.0.0.0/0 10.159.120.249}
+03-14 15:46:39.892   866  4019 D Netd    : ip route add 0.***.0/0 via 10.*******.249 dev rmnet_data0 table 1005
+03-14 15:46:39.894   866  4019 D Netd    : ip route add 0.***.0/0 via 10.*******.249 dev rmnet_data0 table 1005 ret=0
+03-14 15:46:39.894  3580  4048 D NetdConnector: RCV <- {200 1718 success}
+03-14 15:46:40.042  3580  4058 D NetdConnector: SND -> {1722 network default set 106}
+03-14 15:46:40.043   866  4019 D Netd    : ip rule add fwmark 0x0/0xffff lookup 1005 prio 22000
+03-14 15:46:40.043   866  4019 D Netd    : ip rule add fwmark 0x0/0xffff lookup 1005 prio 22000 ret=0
+03-14 15:46:40.043  3580  4048 D NetdConnector: RCV <- {200 1722 success}
+
+
